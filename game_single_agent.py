@@ -42,7 +42,6 @@ class GameSingleAgent:
         return True
 
     def check_win(self) -> bool:
-        # pylint: disable=unused-argument
         """check_win method. Validate if the player won. """
         print("function check_win in game_two_agents not created yet")
 
@@ -51,11 +50,17 @@ class GameSingleAgent:
         self.game_state = None
 
     def update_player(self, results):
+        """
+        update_player method. Update the player with the game state and results.
+        """
         if hasattr(self.player, "set_game_results"):
             self.player.set_game_state(self.game_state.copy())
             self.player.set_game_results(results)
-    
+
     def ask_for_retry(self) -> bool:
+        """
+        ask_for_retry method. Ask the player if he wants to retry.
+        """
         retry = False
         if hasattr(self.player, "ask_for_retry"):
             retry = self.player1.ask_for_retry()
@@ -77,14 +82,13 @@ class GameSingleAgent:
         turn = 0
 
         while turn < self.turns_limit:
-            print(f"starting turn {turn+1}")
             self.print_game_state()
             if not self.set_move(player):
                 return None
             turn+=1
 
-            gameFinished = self.check_win()
-            if gameFinished is not None:
+            game_finished = self.check_win() # pylint: disable=E1111
+            if game_finished is not None:
                 break
 
         if turn == self.turns_limit:
@@ -93,7 +97,13 @@ class GameSingleAgent:
             self.print_game_state()
             return None
 
-        print(f"Result is {"win" if gameFinished else "lose"}")
+        print(f"Result is {"win" if game_finished else "lose"}")
         self.print_game_state()
 
         return player.get_name()
+
+    def calculate_score(self) -> dict:
+        """
+        calculate_score method. Calculate the score of the game.
+        """
+        return {}

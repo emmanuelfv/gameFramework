@@ -18,7 +18,8 @@ right
 0 0 4 8
 4 2 4 2
 A move will be invalid if it does not generate any movement in the current cells.
-The player loses if, after a valid move, the new number cannot be placed. Their final score will be the total sum of the cells.
+The player loses if, after a valid move, the new number cannot be placed. 
+Their final score will be the total sum of the cells.
 The player wins if they score 2048 points in a single cell.
 Agents:
 user interface
@@ -30,7 +31,7 @@ Recurrent networks
 import random
 
 from game_single_agent import GameSingleAgent
-from game2048.cursor_move import MoveValue
+from game2048.cursor_move import CursorValue
 from game2048.players.agent_player import AgentPlayer
 
 class Game2048(GameSingleAgent):
@@ -44,6 +45,7 @@ class Game2048(GameSingleAgent):
         self.game_state = [[0] * self.grid_size for _ in range(self.grid_size)]
         self.win_threshold = 2048
         self.turns_limit = 300
+        self.current_turn = 0
         print(self.game_name)
 
 
@@ -56,9 +58,24 @@ class Game2048(GameSingleAgent):
             print("".join(f"{num:5}" for num in row))
 
 
+    def get_valid_moves(self):
+        """get_valid_moves method. Get the valid moves for the current game state."""
+        valid_moves = []
+        original_state = self.game_state.copy()
+        for move in (CursorValue.UP, CursorValue.DOWN, CursorValue.LEFT, CursorValue.RIGHT):
+            temp_state = self.move_to_temp_state(move)
+            self.sum_values_and_shrink(temp_state)
+            self.move_to_state(temp_state, move)
+            if self.game_state != temp_state:
+                valid_moves.append(move)
+            self.game_state = original_state.copy()
+        return valid_moves
+
     def set_move(self, player: AgentPlayer)-> bool:
         """set_move method. Run the player decide method."""
-        player.set_game_state(self.game_state.copy())
+        self.current_turn += 1
+        print(f"turn {self.current_turn}")
+        player.set_game_state(self.game_state.copy(), self.get_valid_moves())
         move = player.decide_move()
         move_status = self.play_move(move)
         if not move_status:
@@ -69,35 +86,29 @@ class Game2048(GameSingleAgent):
     def play_move(self, move)-> bool:
         """play_move method. Upate the game state based on the player move."""
         print(move, type(move))
-        if move in (MoveValue.UP, MoveValue.DOWN, MoveValue.LEFT, MoveValue.RIGHT):
-            tempState = self.moveToTempState(move)
-            self.sumValuesAndShrink(tempState)
-            self.moveToState(tempState, move)
+        if move in (CursorValue.UP, CursorValue.DOWN, CursorValue.LEFT, CursorValue.RIGHT):
+            temp_state = self.move_to_temp_state(move)
+            self.sum_values_and_shrink(temp_state)
+            self.move_to_state(temp_state, move)
             self.add_new_number()
             return True
         return False
 
 
     def check_win(self) -> bool | None:
-        """check_win method. Validate if the player won.
-        It also validates if the game is over by checking that no other sum of same numbers can be done."""
-
+        """check_win method. Validate if the player won. It also validates if the game 
+        is over by checking that no other sum of same numbers can be done."""
         for i in range(self.grid_size):
             for j in range(self.grid_size):
                 if self.game_state[i][j] == self.win_threshold:
                     return True
-        
         is_move_possible = False
         original_state = self.game_state.copy()
-        for move in (MoveValue.UP, MoveValue.DOWN, MoveValue.LEFT, MoveValue.RIGHT):
-            tempState = self.moveToTempState(move)
-            self.sumValuesAndShrink(tempState)
-            self.moveToState(tempState, move)
+        for move in (CursorValue.UP, CursorValue.DOWN, CursorValue.LEFT, CursorValue.RIGHT):
+            temp_state = self.move_to_temp_state(move)
+            self.sum_values_and_shrink(temp_state)
+            self.move_to_state(temp_state, move)
             if original_state != self.game_state:
-                print(f"move possible at {move}")
-                self.print_game_state(tempState)
-                self.print_game_state()
-                print("move possible")
                 is_move_possible = True
                 self.game_state = original_state.copy()
                 break
@@ -110,11 +121,12 @@ class Game2048(GameSingleAgent):
     def reset_state(self):
         """reset_state method. Clear game_state."""
         self.game_state = [ [0] * self.grid_size for i in range(self.grid_size) ]
+        self.add_new_number()
 
 
     ### game specific methods ###
 
-    def sumValuesAndShrink(self, state):
+    def sum_values_and_shrink(self, state):
         """
         sumValues method. Sum two consecutive values for every row.
         After the sum, the values are moved to the left.
@@ -127,13 +139,15 @@ class Game2048(GameSingleAgent):
         grid_size = self.grid_size
         for i in range(grid_size):
             for j in range(grid_size-1):
-                if state[i][j] != 0:
-                    for k in range(j+1, grid_size):
-                        if state[i][k] != 0:
-                            if state[i][j] == state[i][k]:
-                                state[i][j] *= 2
-                                state[i][k] = 0
-                            break
+                if state[i][j] == 0:
+                    continue
+                for k in range(j+1, grid_size):
+                    if state[i][k] == 0:
+                        continue
+                    if state[i][j] == state[i][k]:
+                        state[i][j] *= 2
+                        state[i][k] = 0
+                    break
             cont = 0
             for j in range(grid_size):
                 if state[i][j] != 0:
@@ -142,42 +156,53 @@ class Game2048(GameSingleAgent):
             for j in range(cont, grid_size):
                 state[i][j] = 0
 
-    def moveToTempState(self, direction):
+    def move_to_temp_state(self, direction):
         """Convert state to a temporary representation for left move processing."""
         state = self.game_state
-        if direction == MoveValue.UP:
+        if direction == CursorValue.UP:
             return [list(row) for row in zip(*state)]
-        elif direction == MoveValue.DOWN:
+        if direction == CursorValue.DOWN:
             # Transpose then reverse each row.
             transposed = [list(row) for row in zip(*state)]
             return [list(reversed(row)) for row in transposed]
-        elif direction == MoveValue.LEFT:
+        if direction == CursorValue.LEFT:
             return [row[:] for row in state]
-        elif direction == MoveValue.RIGHT:
+        if direction == CursorValue.RIGHT:
             return [list(reversed(row)) for row in state]
 
-    def moveToState(self, state, direction):
+    def move_to_state(self, state, direction):
         """Revert the temporary representation back to original orientation."""
-        if direction == MoveValue.UP:
+        if direction == CursorValue.UP:
             self.game_state = [list(row) for row in zip(*state)]
-        elif direction == MoveValue.DOWN:
+        elif direction == CursorValue.DOWN:
             reversed_rows = [list(reversed(row)) for row in state]
             self.game_state = [list(row) for row in zip(*reversed_rows)]
-        elif direction == MoveValue.LEFT:
+        elif direction == CursorValue.LEFT:
             self.game_state = [row[:] for row in state]
-        elif direction == MoveValue.RIGHT:
+        elif direction == CursorValue.RIGHT:
             self.game_state = [list(reversed(row)) for row in state]
 
     def add_new_number(self):
         """
         add_new_number method. Add a new number to the state.
         """
-        grid_size = self.grid_size
+        grid_s = self.grid_size
         state = self.game_state
-        empty_cells = [(i, j) for i in range(grid_size) for j in range(grid_size) if state[i][j] == 0]
+        empty_cells = [(i, j) for i in range(grid_s) for j in range(grid_s) if state[i][j] == 0]
         if empty_cells:
             i, j = random.choice(empty_cells)
             state[i][j] = random.choice([2, 4])
 
 
-
+    def calculate_score(self) -> dict:
+        """
+        calculate_score method. Calculate the score of the game.
+        """
+        results_dict = {}
+        score = 0
+        for row in self.game_state:
+            for num in row:
+                score += num
+        results_dict["score"] = score
+        results_dict["turns"] = self.current_turn
+        return results_dict

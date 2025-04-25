@@ -1,7 +1,7 @@
 """agent_player module. Player with basic random logic over valid movements."""
 import random
 
-from game2048.cursor_move import MoveValue
+from game2048.cursor_move import CursorValue
 
 class AgentPlayer:
     """AgentPlayer class. Player with basic random logic over valid movements."""
@@ -26,13 +26,13 @@ class AgentPlayer:
 
     def create_move_list_from_state(self):
         """set_valid_moves method. Create a list all of valid moves."""
-        new_valid_move_list = [MoveValue.UP, MoveValue.DOWN, MoveValue.LEFT, MoveValue.RIGHT]
-        return new_valid_move_list
+        valid_move_list = [CursorValue.UP, CursorValue.DOWN, CursorValue.LEFT, CursorValue.RIGHT]
+        return valid_move_list
 
-    def set_game_state(self, game_state):
+    def set_game_state(self, game_state, valid_move_list=None):
         """set_game_state method. update the state from the game"""
         self.game_state = game_state
-        self.set_valid_moves()
+        self.set_valid_moves(valid_move_list)
 
     def decide_move(self):
         """decide_move method. Implement the strategy and return a movement"""

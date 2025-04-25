@@ -45,9 +45,22 @@ def main():
             print("Retrying")
     print("closing program.")
     """
+
+    runs = 1
+    results = []
+    for i in range(runs):
+        game: GameSingleAgent = Game2048()
+        game.set_player(AgentPlayer())
+        game.start_game()
+        results.append(game.calculate_score()["turns"])
+    print(f"your score is {sum(results) / runs}")
+    """
+
     game: GameSingleAgent = Game2048()
     game.set_player(AgentPlayer())
     game.start_game()
+    print(f"your score is {game.calculate_score()}")
+    """
 
 
 if __name__ == "__main__":
