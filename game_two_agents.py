@@ -1,5 +1,5 @@
 """
-GameTwoAgents.py
+game_two_agents.py
 This class works as an interface to play 2 player games
 A player can be a human or any artifitial inteligence as an agent
 """

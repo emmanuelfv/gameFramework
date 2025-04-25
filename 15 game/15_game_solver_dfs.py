@@ -18,7 +18,7 @@ Final state:
 The purpose of this agent is to generate the minimun number of movements needed to solve the puzzle.
 By change the state to have a pointer to the previos step we will be able to track the hore route.
 
-Using this approach the problem complexity is: (heigth * width)!
+Using this approach the problem complexity is: (heigth * width)! 
 """
 
 class puzzle_15:

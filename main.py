@@ -11,18 +11,24 @@ from TicTacToeBig.tic_tac_toe_big_game import TicTacToeBigGame
 from TicTacToeBig.players.ttt_big_best_move_player import TTTBigAgentPlayer
 from TicTacToeBig.players.ttt_big_ui_player import TTTBigUiPlayer
 
+from game_single_agent import GameSingleAgent
+from game2048.game_2048_game import Game2048
+from game2048.players.agent_player import AgentPlayer 
+
+
 def main():
     """
     main function
     
     example for TicTacToeBigGame:
     """
+    """ 
     game: GameTwoAgents = TicTacToeBigGame()
     game.set_player2(TTTBigAgentPlayer())
     game.set_player1(TTTBigUiPlayer())
     game.set_starter_player()
     game.start_game()
-
+    """
     """
     end game menu
     last piece
@@ -39,5 +45,10 @@ def main():
             print("Retrying")
     print("closing program.")
     """
+    game: GameSingleAgent = Game2048()
+    game.set_player(AgentPlayer())
+    game.start_game()
+
+
 if __name__ == "__main__":
     main()
