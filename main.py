@@ -3,6 +3,8 @@ Main.py
 fution to test the basic fuctionality
 """
 
+import time
+
 from game_two_agents import GameTwoAgents
 from TicTacToe.tic_tac_toe_game import TicTacToeGame
 from TicTacToe.agent_factory import agent_factory
@@ -14,7 +16,8 @@ from TicTacToeBig.players.ttt_big_ui_player import TTTBigUiPlayer
 from game_single_agent import GameSingleAgent
 from game2048.game_2048_game import Game2048
 from game2048.players.agent_player import AgentPlayer 
-
+from game2048.players.human_player import HumanPlayer
+from game2048.players.square_score_based_player import SquareScorePlayer
 
 def main():
     """
@@ -46,11 +49,13 @@ def main():
     print("closing program.")
     """
 
-    runs = 1
+    runs = 100
     results = []
     for i in range(runs):
         game: GameSingleAgent = Game2048()
-        game.set_player(AgentPlayer())
+        #game.set_player(HumanPlayer())
+        #game.set_player(AgentPlayer())
+        game.set_player(SquareScorePlayer(game, 5))
         game.start_game()
         results.append(game.calculate_score()["turns"])
     print(f"your score is {sum(results) / runs}")

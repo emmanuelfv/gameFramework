@@ -82,7 +82,7 @@ class GameSingleAgent:
         turn = 0
 
         while turn < self.turns_limit:
-            self.print_game_state()
+            #self.print_game_state()
             if not self.set_move(player):
                 return None
             turn+=1

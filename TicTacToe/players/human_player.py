@@ -8,7 +8,7 @@ class HumanPlayer(AgentPlayer):
         """__init__ method."""
         super().__init__()
         print("Human player set")
-        self.name = "emmanuel" #input("Name:").strip()
+        self.name = "Human" #input("Name:").strip()
 
     def decide_move(self) -> TTTMove:
         """decide_move method. Implement the strategy and return a movement"""

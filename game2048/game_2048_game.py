@@ -43,8 +43,8 @@ class Game2048(GameSingleAgent):
         self.game_name = "Game2048"
         self.grid_size = 4
         self.game_state = [[0] * self.grid_size for _ in range(self.grid_size)]
-        self.win_threshold = 2048
-        self.turns_limit = 300
+        self.win_threshold = 4096
+        self.turns_limit = 20
         self.current_turn = 0
         print(self.game_name)
 
@@ -66,9 +66,10 @@ class Game2048(GameSingleAgent):
             temp_state = self.move_to_temp_state(move)
             self.sum_values_and_shrink(temp_state)
             self.move_to_state(temp_state, move)
-            if self.game_state != temp_state:
+            if self.game_state != original_state:
                 valid_moves.append(move)
             self.game_state = original_state.copy()
+        #print(f"calculated valid moves: {valid_moves}")
         return valid_moves
 
     def set_move(self, player: AgentPlayer)-> bool:
@@ -85,7 +86,7 @@ class Game2048(GameSingleAgent):
 
     def play_move(self, move)-> bool:
         """play_move method. Upate the game state based on the player move."""
-        print(move, type(move))
+        #print(move, type(move))
         if move in (CursorValue.UP, CursorValue.DOWN, CursorValue.LEFT, CursorValue.RIGHT):
             temp_state = self.move_to_temp_state(move)
             self.sum_values_and_shrink(temp_state)
@@ -182,12 +183,13 @@ class Game2048(GameSingleAgent):
         elif direction == CursorValue.RIGHT:
             self.game_state = [list(reversed(row)) for row in state]
 
-    def add_new_number(self):
+    def add_new_number(self, state=None):
         """
         add_new_number method. Add a new number to the state.
         """
         grid_s = self.grid_size
-        state = self.game_state
+        if state is None:
+            state = self.game_state
         empty_cells = [(i, j) for i in range(grid_s) for j in range(grid_s) if state[i][j] == 0]
         if empty_cells:
             i, j = random.choice(empty_cells)
@@ -205,4 +207,5 @@ class Game2048(GameSingleAgent):
                 score += num
         results_dict["score"] = score
         results_dict["turns"] = self.current_turn
+        results_dict["is_win"] = self.check_win()
         return results_dict
