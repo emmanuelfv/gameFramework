@@ -28,7 +28,7 @@ Convilucionals
 Recurrent networks
 """
 
-import random
+import random 
 
 from game_single_agent import GameSingleAgent
 from game2048.cursor_move import CursorValue
@@ -44,10 +44,9 @@ class Game2048(GameSingleAgent):
         self.grid_size = 4
         self.game_state = [[0] * self.grid_size for _ in range(self.grid_size)]
         self.win_threshold = 4096
-        self.turns_limit = 20
+        self.turns_limit = 2000
         self.current_turn = 0
         print(self.game_name)
-
 
     def print_game_state(self, state = None):
         """print_game_state method. Print the tic tac toe game state. """
@@ -56,7 +55,6 @@ class Game2048(GameSingleAgent):
             state = self.game_state
         for row in state:
             print("".join(f"{num:5}" for num in row))
-
 
     def get_valid_moves(self):
         """get_valid_moves method. Get the valid moves for the current game state."""
@@ -69,7 +67,6 @@ class Game2048(GameSingleAgent):
             if self.game_state != original_state:
                 valid_moves.append(move)
             self.game_state = original_state.copy()
-        #print(f"calculated valid moves: {valid_moves}")
         return valid_moves
 
     def set_move(self, player: AgentPlayer)-> bool:
@@ -83,7 +80,6 @@ class Game2048(GameSingleAgent):
             print("invalid Move, lose")
         return move_status
 
-
     def play_move(self, move)-> bool:
         """play_move method. Upate the game state based on the player move."""
         #print(move, type(move))
@@ -94,7 +90,6 @@ class Game2048(GameSingleAgent):
             self.add_new_number()
             return True
         return False
-
 
     def check_win(self) -> bool | None:
         """check_win method. Validate if the player won. It also validates if the game 
@@ -118,10 +113,10 @@ class Game2048(GameSingleAgent):
             return False
         return None
 
-
     def reset_state(self):
         """reset_state method. Clear game_state."""
         self.game_state = [ [0] * self.grid_size for i in range(self.grid_size) ]
+        self.add_new_number()
         self.add_new_number()
 
 
@@ -186,6 +181,7 @@ class Game2048(GameSingleAgent):
     def add_new_number(self, state=None):
         """
         add_new_number method. Add a new number to the state.
+        The number is either 2 or 4 with 90% probability of being 2.
         """
         grid_s = self.grid_size
         if state is None:
@@ -193,8 +189,7 @@ class Game2048(GameSingleAgent):
         empty_cells = [(i, j) for i in range(grid_s) for j in range(grid_s) if state[i][j] == 0]
         if empty_cells:
             i, j = random.choice(empty_cells)
-            state[i][j] = random.choice([2, 4])
-
+            state[i][j] = 2 if random.random() < 0.9 else 4
 
     def calculate_score(self) -> dict:
         """
@@ -208,4 +203,5 @@ class Game2048(GameSingleAgent):
         results_dict["score"] = score
         results_dict["turns"] = self.current_turn
         results_dict["is_win"] = self.check_win()
+        results_dict["max_tile"] = max([max(row) for row in self.game_state])
         return results_dict

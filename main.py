@@ -4,6 +4,7 @@ fution to test the basic fuctionality
 """
 
 import time
+from collections import Counter
 
 from game_two_agents import GameTwoAgents
 from TicTacToe.tic_tac_toe_game import TicTacToeGame
@@ -57,8 +58,10 @@ def main():
         #game.set_player(AgentPlayer())
         game.set_player(SquareScorePlayer(game, 5))
         game.start_game()
-        results.append(game.calculate_score()["turns"])
-    print(f"your score is {sum(results) / runs}")
+        #results.append(game.calculate_score()["turns"])
+        results.append(game.calculate_score()["max_tile"])
+    #print(f"your score is {sum(results) / runs}")
+    print(f"max tiles are: {Counter(results)}")
     """
 
     game: GameSingleAgent = Game2048()
