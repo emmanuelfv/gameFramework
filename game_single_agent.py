@@ -68,7 +68,7 @@ class GameSingleAgent:
                 print("retry has been requested by player 1")
         return retry
 
-    def start_game(self):
+    def start_game(self, print_game_state = True, times=None) -> str | None:
         """
         start_game method. Control the game flow.
         flow:
@@ -82,8 +82,9 @@ class GameSingleAgent:
         turn = 0
 
         while turn < self.turns_limit:
-            #self.print_game_state()
-            if not self.set_move(player):
+            if print_game_state:
+                self.print_game_state()
+            if not self.set_move(player, times):
                 return None
             turn+=1
 

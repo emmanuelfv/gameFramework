@@ -28,7 +28,9 @@ Convilucionals
 Recurrent networks
 """
 
+import time
 import random 
+from copy import deepcopy
 
 from game_single_agent import GameSingleAgent
 from game2048.cursor_move import CursorValue
@@ -59,23 +61,37 @@ class Game2048(GameSingleAgent):
     def get_valid_moves(self):
         """get_valid_moves method. Get the valid moves for the current game state."""
         valid_moves = []
-        original_state = self.game_state.copy()
+        original_state = deepcopy(self.game_state)   # using deepcopy for nested lists
         for move in (CursorValue.UP, CursorValue.DOWN, CursorValue.LEFT, CursorValue.RIGHT):
             temp_state = self.move_to_temp_state(move)
             self.sum_values_and_shrink(temp_state)
             self.move_to_state(temp_state, move)
             if self.game_state != original_state:
                 valid_moves.append(move)
-            self.game_state = original_state.copy()
+            self.game_state = deepcopy(original_state)  # restore state from deepcopy
         return valid_moves
 
-    def set_move(self, player: AgentPlayer)-> bool:
+    def set_move(self, player: AgentPlayer, times=None)-> bool:
         """set_move method. Run the player decide method."""
         self.current_turn += 1
         print(f"turn {self.current_turn}")
-        player.set_game_state(self.game_state.copy(), self.get_valid_moves())
+
+        t1 = time.time()
+        valid_moves = self.get_valid_moves()
+        t2 = time.time()
+        player.set_game_state(self.game_state.copy(), valid_moves)
+        t3 = time.time()
         move = player.decide_move()
+        t4 = time.time()
         move_status = self.play_move(move)
+        t5 = time.time()
+
+        if times is not None:
+            times[0] += t2 - t1
+            times[1] += t3 - t2
+            times[2] += t4 - t3
+            times[3] += t5 - t4
+
         if not move_status:
             print("invalid Move, lose")
         return move_status
@@ -99,16 +115,16 @@ class Game2048(GameSingleAgent):
                 if self.game_state[i][j] == self.win_threshold:
                     return True
         is_move_possible = False
-        original_state = self.game_state.copy()
+        original_state = deepcopy(self.game_state)   # use deepcopy here
         for move in (CursorValue.UP, CursorValue.DOWN, CursorValue.LEFT, CursorValue.RIGHT):
             temp_state = self.move_to_temp_state(move)
             self.sum_values_and_shrink(temp_state)
             self.move_to_state(temp_state, move)
             if original_state != self.game_state:
                 is_move_possible = True
-                self.game_state = original_state.copy()
+                self.game_state = deepcopy(original_state)
                 break
-            self.game_state = original_state.copy()
+            self.game_state = deepcopy(original_state)
         if not is_move_possible:
             return False
         return None

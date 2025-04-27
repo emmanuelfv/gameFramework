@@ -19,11 +19,10 @@ class SquareScorePlayer(AgentPlayer):
     def decide_move(self):
         """decide_move method. Implement the strategy and return a movement.
         This method also implements a BFS to find the best move."""
-        from copy import deepcopy
         # Helper: simulate a move on a given state using game methods.
         def simulate_move(state, move):
-            # Use deepcopy to avoid side effects.
-            new_state = deepcopy(state)
+            # Use a shallow copy for a 2D list instead of deepcopy for improved performance.
+            new_state = [row[:] for row in state]
             if move == CursorValue.UP:
                 temp_state = [list(row) for row in zip(*new_state)]
                 self.game.sum_values_and_shrink(temp_state)
@@ -45,7 +44,7 @@ class SquareScorePlayer(AgentPlayer):
             return new_state
 
         # Initialize BFS from the current state.
-        orig_state = deepcopy(self.game.game_state)
+        orig_state = [row[:] for row in self.game.game_state]  # could replace deepcopy here if safe.
         best_score = float('-inf')
         best_first_move = None
         
@@ -57,6 +56,8 @@ class SquareScorePlayer(AgentPlayer):
             if state_after_move != orig_state:
                 queue.append((state_after_move, move, 1))
         
+        # Predefined moves.
+        moves = (CursorValue.UP, CursorValue.DOWN, CursorValue.LEFT, CursorValue.RIGHT)
         # BFS over moves up to self.depth
         while queue:
             state, first_move, depth = queue.pop()
@@ -71,7 +72,7 @@ class SquareScorePlayer(AgentPlayer):
                     best_score = score
                     best_first_move = first_move
             else:
-                for move in (CursorValue.UP, CursorValue.DOWN, CursorValue.LEFT, CursorValue.RIGHT):
+                for move in moves:
                     self.game.add_new_number(state)
                     next_state = simulate_move(state, move)
                     # Only pursue moves that change the state.

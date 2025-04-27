@@ -19,6 +19,7 @@ from game2048.game_2048_game import Game2048
 from game2048.players.agent_player import AgentPlayer 
 from game2048.players.human_player import HumanPlayer
 from game2048.players.square_score_based_player import SquareScorePlayer
+from game2048.performance_test import test_overal_performance
 
 def main():
     """
@@ -49,27 +50,8 @@ def main():
             print("Retrying")
     print("closing program.")
     """
-
-    runs = 100
-    results = []
-    for i in range(runs):
-        game: GameSingleAgent = Game2048()
-        #game.set_player(HumanPlayer())
-        #game.set_player(AgentPlayer())
-        game.set_player(SquareScorePlayer(game, 5))
-        game.start_game()
-        #results.append(game.calculate_score()["turns"])
-        results.append(game.calculate_score()["max_tile"])
-    #print(f"your score is {sum(results) / runs}")
-    print(f"max tiles are: {Counter(results)}")
-    """
-
-    game: GameSingleAgent = Game2048()
-    game.set_player(AgentPlayer())
-    game.start_game()
-    print(f"your score is {game.calculate_score()}")
-    """
-
+    #test_overal_performance("SquareScorePlayer", runs=100, depth=5)
+    test_overal_performance("AgentPlayer", runs=1000)
 
 if __name__ == "__main__":
     main()
